@@ -110,6 +110,7 @@ LABEL_LOADING:
 	push word 1
 	push ax
 	call LABEL_READ_SECTOR
+	add bx,512
 	add sp,4
 
 	xor dx,dx
@@ -138,7 +139,8 @@ CMP_NEXT_SECTOR:
 	jmp LABEL_LOADING
 
 LABEL_BEGIN_CORE:
-	jmp LoaderCoreAddr_base:LoaderCoreAddr_base
+	;----细心细心----
+	jmp LoaderCoreAddr_base:LoaderCoreAddr_offset
 ;	jmp $
 
 LABEL_CMP_NAME:;无参数，所用全局变量LABEL_CMP_ADDR
