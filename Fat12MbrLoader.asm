@@ -43,6 +43,9 @@ LABEL_START:
 	mov ds,ax
 	mov ss,ax
 	mov sp,0x7c00
+
+	call ClearScreen
+
 	mov ax,LoaderCoreAddr_base
 	mov es,ax
 	mov bx,0
@@ -202,6 +205,25 @@ LABEL_READ_SECTOR:
 	mov sp,bp
 	pop bp
 	ret
+
+ClearScreen:
+	push es
+	push bx
+	push cx
+	push ax
+	mov cx,80*25
+	mov ax,0xb800
+	mov es,ax
+	mov ax,0x20
+	xor bx,bx
+ClrLoop:
+	mov [es:bx],ax
+	add bx,2
+	loop ClrLoop
+	pop ax
+	pop cx
+	pop bx
+	pop es
 
 DisplayMsg:;dx--在LOAD_RUSULT中的信息索引
 	push es
