@@ -78,17 +78,21 @@ LOOP_CMP_NEXT:
 	loop LABEL_SEARCH_LOADER
 
 LABEL_NO_LOADER:
-	mov ax,0xb800
-	mov es,ax
-	mov [es:0],byte 'W'
-	mov [es:1],byte 0x0c
+;	mov ax,0xb800
+;	mov es,ax
+;	mov [es:0],byte 'W'
+;	mov [es:1],byte 0x0c
+	mov dx,str_no_loader
+	call DisplayMsg
 	jmp $
 
 LABEL_FIND_LOADER:
-	mov ax,0xb800
-	mov es,ax
-	mov [es:0],byte 'R'
-	mov [es:1],byte 0x0c
+;	mov ax,0xb800
+;	mov es,ax
+;	mov [es:0],byte 'R'
+;	mov [es:1],byte 0x0c
+	mov dx,str_load_ok
+	call DisplayMsg
 	;加载FAT表
 	mov ax,Fat16_base
 	mov es,ax
@@ -110,7 +114,7 @@ LABEL_LOADING:
 	push word 1
 	push ax
 	call LABEL_READ_SECTOR
-	add bx,512
+	add bx,512			;V1版本由于没有加这行,导致执行大于512B的bootloader失败
 	add sp,4
 
 	xor dx,dx
@@ -139,7 +143,6 @@ CMP_NEXT_SECTOR:
 	jmp LABEL_LOADING
 
 LABEL_BEGIN_CORE:
-	;----细心细心----
 	jmp LoaderCoreAddr_base:LoaderCoreAddr_offset
 ;	jmp $
 
@@ -200,9 +203,28 @@ LABEL_READ_SECTOR:
 	pop bp
 	ret
 
+DisplayMsg:;dx--在LOAD_RUSULT中的信息索引
+	push es
+	mov ax,cs
+	mov es,ax
+	mov bp,dx
+	add bp,LOAD_RESULT
+	mov cx,9
+	mov ax,0x1301
+	mov bx,0x000c
+	mov dx,0x0100
+	int 10h
+	pop es
+	ret
+
 LABEL_LOADER_NAME:
 	db 'LOADER  BIN'
 LoaderNameLen equ $-LABEL_LOADER_NAME
+LOAD_RESULT:
+	db 'Load ok  '	;9byte
+	str_load_ok equ 0
+	db 'No Loader'	;9byte
+	str_no_loader equ 9
 LABEL_LOADER_SECTOR:dw 0
 ;名称比较的起始地址
 LABEL_CMP_ADDR:
